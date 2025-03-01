@@ -1,0 +1,62 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "2.0.0",
+    "title": "challenge-match-transactions-api",
+    "description": "This is a four-part challenge designed to assess your ability to write code that matches transaction records to order records, while considering various complications and deployment steps",
+    "contact": {
+      "email": "contact@matheusicaro.com"
+    }
+  },
+  "basePath": "",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "check the Api status",
+        "description": "",
+        "operationId": "getHealth",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "status": "ONLINE",
+            "schema": {
+              "$ref": "#/definitions/HealthStatusEntity"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "HealthStatusEntity": {
+      "type": "object",
+      "properties": {
+        "time": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2021-01-30T08:30:00Z"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ONLINE",
+            "FAILED"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
