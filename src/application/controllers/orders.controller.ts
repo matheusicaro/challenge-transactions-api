@@ -3,12 +3,12 @@ import { RestControllerBase, singleton } from 'matheusicaro-node-framework';
 import { CostumerOrderMatch } from '../domain/entities/costumer-order-match.entity';
 
 @singleton()
-class TransactionsController extends RestControllerBase {
+class OrdersController extends RestControllerBase {
   public async matchCustomerOrdersTransactions(_req: Request, res: Response): Promise<Response<CostumerOrderMatch>> {
     try {
       // TODO: call provider
       // TODO: return CostumerOrderMatch
-      return res.status(200).json({});
+      return res.status(200).json({ message: 'matchCustomerOrdersTransactions' });
     } catch (error) {
       return this.handleErrorThenRespondFailedOnRequest({
         error,
@@ -21,4 +21,4 @@ class TransactionsController extends RestControllerBase {
   }
 }
 
-export { TransactionsController };
+export { OrdersController };

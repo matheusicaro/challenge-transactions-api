@@ -1,5 +1,5 @@
 import swaggerUI from 'swagger-ui-express';
-import swaggerDocs from './swagger.json';
+import { SwaggerDefinition } from './swagger';
 import { Environment } from './configuration/environment';
 
 const options = {
@@ -15,5 +15,5 @@ const options = {
 export const Swagger = {
   path: Environment.API_DOCS_PATH,
   server: swaggerUI.serve,
-  middleware: swaggerUI.setup({ ...swaggerDocs, basePath: Environment.API_BASE_PATH }, options)
+  middleware: swaggerUI.setup(SwaggerDefinition, options)
 };

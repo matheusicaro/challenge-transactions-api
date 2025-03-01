@@ -1,3 +1,5 @@
+import { Transactions } from './transactions.entity';
+
 /**
  * Order DTO received from API inputs
  */
@@ -21,6 +23,7 @@ type Order = {
     name: string;
     price: number;
   };
+  transactions: Transactions[];
 };
 
 export { Order, OrderDTO };
