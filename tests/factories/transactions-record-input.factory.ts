@@ -7,7 +7,6 @@ import {
   TransactionsDTO
 } from '../../src/application/domain/entities/dtos/transactions-record-Input.dto';
 
-// declare any custom function to override specific params and make it easier to build specific objects
 class TransactionsRecordInputFactoryType extends Factory<TransactionsRecordInput> {}
 class OrderDTOFactoryType extends Factory<OrderDTO> {}
 class TransactionsDTOFactoryType extends Factory<TransactionsDTO> {}
