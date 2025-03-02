@@ -1,19 +1,19 @@
 /**
  * Order DTO received from API inputs
  */
-type OrderDTO = {
+export type OrderDTO = {
   orderId: string;
   customerName: string;
   date: string;
   price: number;
   product: string;
-  type: 'order';
+  type: string;
 };
 
 /**
  * Transaction DTO received from API inputs
  */
-type TransactionsDTO = {
+export type TransactionsDTO = {
   customerName: string;
   date: string;
   orderId: string;
@@ -22,12 +22,22 @@ type TransactionsDTO = {
   transactionDate: string;
   transactionType: string;
   transactionAmount: number;
-  type: 'txn';
+  type: string;
 };
 
 type TransactionsRecordInput = {
   orders: OrderDTO[];
-  transactions: TransactionsDTO;
+  transactions: TransactionsDTO[];
 };
 
-export { TransactionsRecordInput };
+const isValidTransactionsRecordInput = (input: unknown): boolean => {
+  const orders = (input as Partial<TransactionsRecordInput>).orders;
+  const transactions = (input as Partial<TransactionsRecordInput>).transactions;
+
+  const isValidOrders = orders && Array.isArray(orders);
+  const isValidTransactions = transactions && Array.isArray(transactions);
+
+  return !isValidOrders || !isValidTransactions;
+};
+
+export { TransactionsRecordInput, isValidTransactionsRecordInput };
