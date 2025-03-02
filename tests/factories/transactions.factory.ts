@@ -3,7 +3,6 @@ import { faker } from '@faker-js/faker';
 
 import { Transaction, TransactionType } from '../../src/application/domain/entities/transaction.entity';
 
-// declare any custom function to override specific params and make it easier to build specific objects
 class TransactionFactoryType extends Factory<Transaction> {}
 
 const TransactionFactory = TransactionFactoryType.define(() => ({
