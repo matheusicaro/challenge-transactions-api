@@ -1,29 +1,19 @@
-import { Transactions } from './transactions.entity';
-
-/**
- * Order DTO received from API inputs
- */
-type OrderDTO = {
-  orderId: string;
-  customerName: string;
-  date: string;
-  price: number;
-  product: string;
-  type: 'order';
-};
+import { Transaction } from './transaction.entity';
 
 /**
  * Order as a domain entity
  */
 type Order = {
   id: string;
+  type: string;
+  customerName: string;
   date: Date;
   product: {
     // Product could be a new entity, but will leave as a sub entity of Order for now
     name: string;
     price: number;
   };
-  transactions: Transactions[];
+  transactions: Transaction[];
 };
 
-export { Order, OrderDTO };
+export { Order };
