@@ -1,4 +1,5 @@
 # challenge-match-transactions-api
+
 Summary:
 
 - [challenge-match-transactions-api](#challenge-match-transactions-api)
@@ -27,9 +28,19 @@ For each part was created a issue:
 
 # How to run the API
 
-1. clone this repository
-2. in the root folder run: `npm install`
-3. then run: `npm start`
+1. Clone this repository
+2. rename [.env-example](https://github.com/matheusicaro/challenge-transactions-api/blob/master/.env-example) file to to `.env`
+3. In the root folder run: `npm install`
+4. Then run: `npm start`
+5. Go to API docs: http://localhost:4001/api/v1/docs/
+  
+![alt text](./docs/swagger.png)
+
+<details><summary> 📸 Running local</summary>
+
+https://github.com/user-attachments/assets/c42ee20a-d901-4806-9247-a6cc8f041944
+
+</details>
 
 <br>
 <br>
