@@ -4,7 +4,7 @@ import { Transaction } from '../../entities/transaction.entity';
 export type CustomerTransactions = Array<{ customerName: string; transactions: Transaction[] }>;
 
 export interface TransactionsProviderPort {
-  getTransactions(dto: TransactionsDTO[]): Transaction[];
+  getTransactionsFromDTOs(dto: TransactionsDTO[]): Transaction[];
 
   getCustomerTransactions(transactions: Transaction[]): CustomerTransactions;
 }

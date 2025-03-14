@@ -7,9 +7,17 @@ import { TransactionsDTO } from '../../entities/dtos/transactions-record-Input.d
 
 class TransactionsProviderAdapter implements TransactionsProviderPort {
   /**
+   * Method that returns a list of transactions by costumer name
    *
-   * @param transactions
-   * @returns
+   * @arg {Transaction}: list of transactions
+   * @returns {CustomerTransactions}
+   * @example
+   * ```
+   *  getCustomerTransactions([ transaction_1, transaction_2, ...n ])
+   *  returns [
+   *      { customerName: x, transactions: [ transaction_1 ] },
+   *      { customerName: y, transactions: [ transaction_2, ..n ] } ]
+   * ```
    */
   public getCustomerTransactions(transactions: Transaction[]): CustomerTransactions {
     const customersTransactions: CustomerTransactions = [];
@@ -30,7 +38,14 @@ class TransactionsProviderAdapter implements TransactionsProviderPort {
     return customersTransactions;
   }
 
-  public getTransactions(transactionsDto: TransactionsDTO[]): Transaction[] {
+  /**
+   * Method that parse the TransactionsDTO to Transaction domain
+   *
+   * @arg {TransactionsDTO[]}:
+   * @returns {Transaction[]}
+   * @example
+   */
+  public getTransactionsFromDTOs(transactionsDto: TransactionsDTO[]): Transaction[] {
     const transactions: Transaction[] = [];
 
     for (const dto of transactionsDto) {
