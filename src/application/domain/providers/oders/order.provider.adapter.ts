@@ -14,16 +14,21 @@ import { Transaction } from '../../entities/transaction.entity';
 class OrdersProviderAdapter implements OrdersProviderPort {
   constructor(
     @inject(ProviderTokens.TransactionsProvider)
+    private transactionsProvider: TransactionsProviderPort,
+    @inject(ProviderTokens.TransactionsProvider)
     private transactionsProvider: TransactionsProviderPort
   ) {}
 
   public getOrdersMatchedWithTransactions(input: TransactionsRecordInput): CostumerOrderMatch[] {
-    const transactions = this.transactionsProvider.getTransactions(input.transactions);
+    const orders = this.getOrdersFromDTOs(input.orders);
+    const transactions = this.transactionsProvider.getTransactionsFromDTOs(input.transactions);
     const customerTransactions = this.transactionsProvider.getCustomerTransactions(transactions);
 
     const costumerOrderMatchList: CostumerOrderMatch[] = [];
 
-    for (const orderDto of input.orders) {
+    for (const order of orders) {
+
+      
       const oderTransactions = customerTransactions.find((item) => item.customerName === orderDto.customerName);
 
       const order = this.buildOrder(orderDto, oderTransactions?.transactions || []);
@@ -53,7 +58,11 @@ class OrdersProviderAdapter implements OrdersProviderPort {
     return costumerOrderMatchList;
   }
 
-  private buildOrder(dto: OrderDTO, transactions: Transaction[]): Order {
+  private getOrdersFromDTOs(oderDtoList: OrderDTO[]): Order[] {
+    return oderDtoList.map((dto) => this.buildOrders(dto, []));
+  }
+
+  private buildOrders(dto: OrderDTO, transactions: Transaction[]): Order {
     const date = parseToDate(dto.date);
 
     if (!date) {
