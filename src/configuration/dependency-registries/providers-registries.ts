@@ -3,6 +3,7 @@ import { OrdersProviderAdapter } from '../../application/domain/providers/oders/
 import { DependencyRegistry } from './dependency-registry';
 import { TransactionsProviderAdapter } from '../../application/domain/providers/transactions/transaction.provider.adapter';
 import { ProviderTokens } from './tokens';
+import { OperationMatcherProviderAdapter } from '../../application/domain/providers/operations-matcher/operation-matcher.provider';
 
 function registerProviders(this: DependencyRegistry): void {
   /**
@@ -16,8 +17,17 @@ function registerProviders(this: DependencyRegistry): void {
 
   this.register(
     RegistryScope.TRANSIENT_NON_SINGLETON,
+    ProviderTokens.OperationMatcherProvider,
+    new OperationMatcherProviderAdapter()
+  );
+
+  this.register(
+    RegistryScope.TRANSIENT_NON_SINGLETON,
     ProviderTokens.OrdersProvider,
-    new OrdersProviderAdapter(this.resolve(ProviderTokens.TransactionsProvider))
+    new OrdersProviderAdapter(
+      this.resolve(ProviderTokens.TransactionsProvider),
+      this.resolve(ProviderTokens.OperationMatcherProvider)
+    )
   );
 }
 

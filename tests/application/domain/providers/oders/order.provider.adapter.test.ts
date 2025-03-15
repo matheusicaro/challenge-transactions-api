@@ -5,10 +5,11 @@ import { ProviderTokens } from '../../../../../src/configuration/dependency-regi
 import { TransactionsProviderPort } from '../../../../../src/application/domain/providers/transactions/transaction.provider.port';
 import {
   OrderDTOFactoryTypeFactory,
-  TransactionsDTOFactory
+  TransactionDTOFactory
 } from '../../../../factories/transactions-record-input.factory';
 import { TransactionFactory } from '../../../../factories/transactions.factory';
 import { OrdersProviderAdapter } from '../../../../../src/application/domain/providers/oders/order.provider.adapter';
+import { OperationMatcherProviderPort } from '../../../../../src/application/domain/providers/operations-matcher/operation-matcher.port';
 
 describe('OrdersProviderAdapter', () => {
   let provider: OrdersProviderAdapter;
@@ -16,32 +17,31 @@ describe('OrdersProviderAdapter', () => {
   const dependencyRegistry = getDependencyRegistryInstance();
 
   const stubTransactionsProvider = jestStub<TransactionsProviderPort>();
+  const stubOperationMatcherProvider = jestStub<OperationMatcherProviderPort>();
 
   beforeEach(async () => {
     dependencyRegistry.container.register(ProviderTokens.OrdersProvider, {
       useValue: stubTransactionsProvider
     });
 
-    provider = new OrdersProviderAdapter(stubTransactionsProvider);
+    provider = new OrdersProviderAdapter(stubTransactionsProvider, stubOperationMatcherProvider);
   });
 
   describe('getOrdersMatchedWithTransactions', () => {
-    const customerName = 'matheus';
+    const customer = 'matheus';
 
-    const orderDto = OrderDTOFactoryTypeFactory.build({ customerName });
-    const transactionDto = TransactionsDTOFactory.build({
-      customerName
+    const orderDto = OrderDTOFactoryTypeFactory.build({ customer });
+    const transactionDto = TransactionDTOFactory.build({
+      customer
     });
     const transaction = TransactionFactory.build({
-      customerName,
+      customer,
       date: new Date(transactionDto.date)
     });
 
     beforeEach(() => {
-      stubTransactionsProvider.getTransactions.mockReturnValueOnce([transaction]);
-      stubTransactionsProvider.getCustomerTransactions.mockReturnValueOnce([
-        { customerName, transactions: [transaction] }
-      ]);
+      stubTransactionsProvider.getTransactionsFromDTOs.mockReturnValueOnce([transaction]);
+      stubOperationMatcherProvider.verifyMatch.mockReturnValueOnce({ match: true, accuracy: 1 });
     });
 
     it('should return CostumerOrderMatch correctly', async () => {
@@ -50,26 +50,24 @@ describe('OrdersProviderAdapter', () => {
         transactions: [transactionDto]
       });
 
-      expect(result).toEqual([
-        {
-          customerName: 'matheus',
-          orders: [
-            {
-              date: orderDto.date,
-              id: orderDto.orderId,
-              type: orderDto.type,
-              product: { name: orderDto.product, price: orderDto.price },
-              transactions: [
-                {
-                  amount: transaction.amount,
-                  date: transactionDto.date,
-                  orderId: transaction.orderId,
-                  type: transaction.type
-                }
-              ]
-            }
-          ]
-        }
+      expect(result.nonMatches).toEqual({ orders: [], txns: [] });
+      expect(result.matches[0].order).toEqual({
+        customer: orderDto.customer,
+        orderId: orderDto.orderId,
+        date: orderDto.date,
+        item: orderDto.item,
+        price: orderDto.price
+      });
+      expect(result.matches[0].txns).toEqual([
+        expect.objectContaining({
+          customer: transaction.customer,
+          orderId: transaction.orderId,
+          date: transaction.originalDate,
+          item: transaction.item,
+          txnType: transaction.type,
+          txnAmount: transaction.amount,
+          match: { accuracy: '100%', orderId: orderDto.orderId }
+        })
       ]);
     });
 

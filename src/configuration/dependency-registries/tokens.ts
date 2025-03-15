@@ -1,6 +1,7 @@
 const enum ProviderTokens {
   TransactionsProvider = 'TransactionsProvider',
-  OrdersProvider = 'OrdersProvider'
+  OrdersProvider = 'OrdersProvider',
+  OperationMatcherProvider = 'OperationMatcherProvider'
 }
 
 export { ProviderTokens };
