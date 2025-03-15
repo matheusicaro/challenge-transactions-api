@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "start": "npx ts-node-transpile-only src/server.ts",
+    "start": "npm install && npx ts-node-transpile-only src/server.ts",
     "start:prod": "npm run build && node build/server.js",
     "start:dev": "nodemon",
     "lint": "eslint . ",
@@ -34,7 +34,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "fuse.js": "^7.1.0",
     "matheusicaro-node-framework": "^1.1.0",
     "morgan": "^1.10.0",
     "swagger-schema-official": "^2.0.0-bab6bed",
