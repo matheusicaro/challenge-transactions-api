@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { inject, RestControllerBase, singleton, InvalidRequestError } from 'matheusicaro-node-framework';
 
-import { CostumerOrderMatch } from '../domain/entities/costumer-order-match.entity';
+import { MatchTransactionDTO } from '../domain/entities/dtos/match-transactions.dto';
 import { ProviderTokens } from '../../configuration/dependency-registries/tokens';
 import { OrdersProviderPort } from '../domain/providers/oders/order.provider.port';
 import {
@@ -18,7 +18,7 @@ class OrdersController extends RestControllerBase {
     super();
   }
 
-  public async matchCustomerOrdersTransactions(req: Request, res: Response): Promise<Response<CostumerOrderMatch>> {
+  public async matchCustomerOrdersTransactions(req: Request, res: Response): Promise<Response<MatchTransactionDTO>> {
     try {
       const input = req.body as TransactionsRecordInput;
 

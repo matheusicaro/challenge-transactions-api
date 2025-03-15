@@ -1,75 +1,43 @@
 import { InvalidArgumentError } from 'matheusicaro-node-framework';
 
-import { CustomerTransactions, TransactionsProviderPort } from './transaction.provider.port';
-import { Transaction, TransactionType } from '../../entities/transaction.entity';
+import { TransactionsProviderPort } from './transaction.provider.port';
+import { Transaction } from '../../entities/transaction.entity';
 import { parseToDate } from '../../../lib/dates';
-import { TransactionsDTO } from '../../entities/dtos/transactions-record-Input.dto';
+import { TransactionDTO } from '../../entities/dtos/transactions-record-Input.dto';
 
 class TransactionsProviderAdapter implements TransactionsProviderPort {
   /**
+   * Method that parse the TransactionsDTO to Transaction domain
    *
-   * @param transactions
-   * @returns
+   * @arg {TransactionsDTO[]}:
+   * @returns {Transaction[]}
+   * @example
    */
-  public getCustomerTransactions(transactions: Transaction[]): CustomerTransactions {
-    const customersTransactions: CustomerTransactions = [];
-
-    for (const transaction of transactions) {
-      const foundCustomer = customersTransactions.find((item) => item.customerName === transaction.customerName);
-
-      if (foundCustomer) {
-        foundCustomer.transactions.push(transaction);
-      } else {
-        customersTransactions.push({
-          customerName: transaction.customerName,
-          transactions: [transaction]
-        });
-      }
-    }
-
-    return customersTransactions;
-  }
-
-  public getTransactions(transactionsDto: TransactionsDTO[]): Transaction[] {
+  public getTransactionsFromDTOs(transactionsDto: TransactionDTO[]): Transaction[] {
     const transactions: Transaction[] = [];
 
     for (const dto of transactionsDto) {
-      const transactionDate = parseToDate(dto.transactionDate);
+      const transactionDate = parseToDate(dto.date);
 
       if (!transactionDate) {
         throw new InvalidArgumentError(`Transaction date is invalid`, {
-          userMessage: `Transaction date is invalid to the oder id ${dto.orderId} and transaction amount ${dto.transactionAmount}`
-        });
-      }
-
-      const type = this.parseTransactionType(dto.transactionType);
-
-      if (!type) {
-        throw new InvalidArgumentError(`Transaction type is invalid`, {
-          userMessage: `Transaction type received should contains payment or refund: ${dto.transactionType}`
+          userMessage: `Transaction date is invalid to the oder id ${dto.orderId} and transaction amount ${dto.txnAmount}`
         });
       }
 
       transactions.push({
-        customerName: dto.customerName,
-        amount: dto.transactionAmount,
+        item: dto.item,
+        price: dto.price,
+        customer: dto.customer,
+        amount: dto.txnAmount,
         orderId: dto.orderId,
         date: transactionDate,
-        type
+        originalDate: dto.date,
+        type: dto.txnType
       });
     }
 
     return transactions;
-  }
-
-  private parseTransactionType(type: string): TransactionType | undefined {
-    if (type.includes('payment')) {
-      return TransactionType.PAYMENT_RECEIVED;
-    }
-
-    if (type.includes('refund')) {
-      return TransactionType.REFUND;
-    }
   }
 }
 

@@ -61,7 +61,23 @@ export const SwaggerDefinition: Spec = {
           '200': {
             description: 'Result of costumer order and transactions matches',
             schema: {
-              $ref: '#/definitions/CostumerOrderMatch'
+              $ref: '#/definitions/MatchTransactionDTO'
+            }
+          },
+          '400': {
+            description: 'When the body input is not valid',
+            schema: {
+              example: {
+                message: 'The input is not valid'
+              }
+            }
+          },
+          '422': {
+            description: 'When is not able to process the request due the body input received',
+            schema: {
+              example: {
+                message: 'The transactions contains a wrong date and is not able to parse it'
+              }
             }
           }
         }
@@ -93,132 +109,164 @@ export const SwaggerDefinition: Spec = {
         orders: {
           type: 'array',
           example: [
-            {
-              type: 'order',
-              customerName: 'Alex Abe',
-              orderId: '1',
-              date: '2023-07-11',
-              product: 'Product A',
-              price: 1.23
-            },
-            {
-              type: 'order',
-              customerName: 'Brian Ben',
-              orderId: '2',
-              date: '2023-08-08',
-              product: 'Product B',
-              price: 3.21
-            }
+            { customer: 'Alex Abel', orderId: '18G', date: '2023-07-11', item: 'Tool A', price: 1.23 },
+            { customer: 'Brian Bell', orderId: '20S', date: '2023-08-08', item: 'Toy B', price: 3.21 }
           ]
         },
         transactions: {
           type: 'array',
           example: [
             {
-              type: 'txn',
-              customerName: 'Alex Abe',
-              orderId: '1',
-              date: '2023-07-11',
-              product: 'Product A',
+              customer: 'Alexis Abe',
+              orderId: '1B6',
+              date: '2023-07-12',
+              item: 'Tool A',
               price: 1.23,
-              transactionType: 'paymentReceived',
-              transactionDate: '2023-07-12',
-              transactionAmount: 1.23
+              txnType: 'payment',
+              txnAmount: 1.23
             },
             {
-              type: 'txn',
-              customerName: 'Alex Abe',
-              orderId: '1',
-              date: '2023-07-11',
-              product: 'Product A',
+              customer: 'Alex Able',
+              orderId: 'I8G',
+              date: '2023-07-13',
+              item: 'Tool A',
               price: 1.23,
-              transactionType: 'refundIssued',
-              transactionDate: '2023-07-13',
-              transactionAmount: -1.23
+              txnType: 'refund',
+              txnAmount: -1.23
             },
             {
-              type: 'txn',
-              customerName: 'Brian Ben',
-              orderId: '2',
-              date: '2023-08-08',
-              product: 'Product B',
+              customer: 'Brian Ball',
+              orderId: 'ZOS',
+              date: '2023-08-11',
+              item: 'Toy B',
               price: 3.21,
-              transactionType: 'payment-1',
-              transactionDate: '2023-08-11',
-              transactionAmount: 1.21
+              txnType: 'payment-1',
+              txnAmount: 1.21
             },
             {
-              type: 'txn',
-              customerName: 'Brian Ben',
-              orderId: '2',
-              date: '2023-08-08',
-              product: 'Product B',
+              customer: 'Bryan',
+              orderId: '705',
+              date: '2023-08-13',
+              item: 'Toy B',
               price: 3.21,
-              transactionType: 'payment-2',
-              transactionDate: '2023-08-13',
-              transactionAmount: 2.0
+              txnType: 'payment-2',
+              txnAmount: 2.0
             }
           ]
         }
       }
     },
-    CostumerOrderMatch: {
+    MatchTransactionDTO: {
       type: 'object',
       properties: {
-        customerName: {
-          type: 'string',
-          example: 'Matheus'
-        },
-        orders: {
+        matches: {
           type: 'array',
+          description: 'list of orders with the matched transactions',
           items: {
-            $ref: '#/definitions/Orders'
+            type: 'object',
+            properties: {
+              order: {
+                $ref: '#/definitions/OrderDTO'
+              },
+              txns: {
+                type: 'array',
+                description: ' the transactions that matches to the order',
+                items: {
+                  $ref: '#/definitions/TransactionDTO'
+                }
+              }
+            }
+          }
+        },
+        nonMatches: {
+          type: 'array',
+          description: 'list of non matches orders and transactions',
+          items: {
+            type: 'object',
+
+            properties: {
+              orders: {
+                type: 'array',
+                description: 'list of orders with no matches for any transactions',
+                items: {
+                  $ref: '#/definitions/OrderDTO'
+                }
+              },
+              txns: {
+                type: 'array',
+                description: 'list of transactions with no matches for any order',
+                items: {
+                  $ref: '#/definitions/TransactionDTO'
+                }
+              }
+            }
           }
         }
       }
     },
-    Orders: {
+    OrderDTO: {
       type: 'object',
       properties: {
-        id: {
-          type: 'string'
-        },
-        date: {
-          type: 'string',
-          example: '2025-01-15'
-        },
-
-        product: {
-          type: 'object',
-          example: {
-            name: 'product-a',
-            price: 15.0
-          }
-        },
-
-        transactions: {
-          $ref: '#/definitions/Transactions'
-        }
-      }
-    },
-    Transactions: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string'
-        },
         orderId: {
           type: 'string'
         },
+        customer: {
+          type: 'string'
+        },
+        item: {
+          type: 'string'
+        },
+        type: {
+          type: 'string'
+        },
+        price: {
+          type: 'number'
+        },
+        date: {
+          type: 'string',
+          example: '2025-01-15'
+        }
+      }
+    },
+    TransactionDTO: {
+      type: 'object',
+      properties: {
+        orderId: {
+          type: 'string'
+        },
+        match: {
+          type: 'object',
+          properties: {
+            orderId: {
+              type: 'string'
+            },
+            accuracy: {
+              type: 'string',
+              example: '95%'
+            }
+          }
+        },
+        customer: {
+          type: 'string'
+        },
         date: {
           type: 'string',
           example: '2025-01-15'
         },
-        type: {
-          type: 'string',
-          example: 'PAYMENT_RECEIVED, REFUND'
+        item: {
+          type: 'string'
         },
-        amount: {
+        price: {
+          type: 'number'
+        },
+        transactionDate: {
+          type: 'string',
+          example: '2025-01-15'
+        },
+        txnType: {
+          type: 'string'
+        },
+        txnAmount: {
           type: 'number',
           example: 1.35
         }

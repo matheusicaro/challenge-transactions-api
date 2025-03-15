@@ -5,10 +5,13 @@ import { ProviderTokens } from '../../../../../src/configuration/dependency-regi
 import { TransactionsProviderPort } from '../../../../../src/application/domain/providers/transactions/transaction.provider.port';
 import {
   OrderDTOFactoryTypeFactory,
-  TransactionsDTOFactory
+  TransactionDTOFactory
 } from '../../../../factories/transactions-record-input.factory';
 import { TransactionFactory } from '../../../../factories/transactions.factory';
 import { OrdersProviderAdapter } from '../../../../../src/application/domain/providers/oders/order.provider.adapter';
+import { OperationMatcherProviderPort } from '../../../../../src/application/domain/providers/operations-matcher/operation-matcher.port';
+import * as OrderHelpers from '../../../../../src/application/domain/providers/oders/order.helpers';
+import { MatchTransactionDTOFactory } from '../../../../factories/match-transaction.dto.factory';
 
 describe('OrdersProviderAdapter', () => {
   let provider: OrdersProviderAdapter;
@@ -16,61 +19,33 @@ describe('OrdersProviderAdapter', () => {
   const dependencyRegistry = getDependencyRegistryInstance();
 
   const stubTransactionsProvider = jestStub<TransactionsProviderPort>();
+  const stubOperationMatcherProvider = jestStub<OperationMatcherProviderPort>();
 
   beforeEach(async () => {
     dependencyRegistry.container.register(ProviderTokens.OrdersProvider, {
       useValue: stubTransactionsProvider
     });
 
-    provider = new OrdersProviderAdapter(stubTransactionsProvider);
+    provider = new OrdersProviderAdapter(stubTransactionsProvider, stubOperationMatcherProvider);
   });
 
   describe('getOrdersMatchedWithTransactions', () => {
-    const customerName = 'matheus';
+    const customer = 'matheus';
 
-    const orderDto = OrderDTOFactoryTypeFactory.build({ customerName });
-    const transactionDto = TransactionsDTOFactory.build({
-      customerName
+    const transactionDto = TransactionDTOFactory.build({
+      customer
     });
+
     const transaction = TransactionFactory.build({
-      customerName,
+      customer,
       date: new Date(transactionDto.date)
     });
 
+    const matchTransactionDTO = MatchTransactionDTOFactory.build();
+
     beforeEach(() => {
-      stubTransactionsProvider.getTransactions.mockReturnValueOnce([transaction]);
-      stubTransactionsProvider.getCustomerTransactions.mockReturnValueOnce([
-        { customerName, transactions: [transaction] }
-      ]);
-    });
-
-    it('should return CostumerOrderMatch correctly', async () => {
-      const result = provider.getOrdersMatchedWithTransactions({
-        orders: [orderDto],
-        transactions: [transactionDto]
-      });
-
-      expect(result).toEqual([
-        {
-          customerName: 'matheus',
-          orders: [
-            {
-              date: orderDto.date,
-              id: orderDto.orderId,
-              type: orderDto.type,
-              product: { name: orderDto.product, price: orderDto.price },
-              transactions: [
-                {
-                  amount: transaction.amount,
-                  date: transactionDto.date,
-                  orderId: transaction.orderId,
-                  type: transaction.type
-                }
-              ]
-            }
-          ]
-        }
-      ]);
+      stubTransactionsProvider.getTransactionsFromDTOs.mockReturnValueOnce([transaction]);
+      jest.spyOn(OrderHelpers, 'buildMatchTransaction').mockReturnValue(matchTransactionDTO);
     });
 
     it('should throw error when order date is invalid', async () => {

@@ -3,31 +3,32 @@
  */
 export type OrderDTO = {
   orderId: string;
-  customerName: string;
+  customer: string;
   date: string;
   price: number;
-  product: string;
-  type: string;
+  item: string;
 };
 
 /**
  * Transaction DTO received from API inputs
  */
-export type TransactionsDTO = {
-  customerName: string;
+export type TransactionDTO = {
+  customer: string;
   date: string;
   orderId: string;
   price: number;
-  product: string;
-  transactionDate: string;
-  transactionType: string;
-  transactionAmount: number;
-  type: string;
+  item: string;
+  txnType: string;
+  txnAmount: number;
+  match?: {
+    orderId: string;
+    accuracy: string;
+  };
 };
 
 type TransactionsRecordInput = {
   orders: OrderDTO[];
-  transactions: TransactionsDTO[];
+  transactions: TransactionDTO[];
 };
 
 const isValidTransactionsRecordInput = (input: unknown): boolean => {

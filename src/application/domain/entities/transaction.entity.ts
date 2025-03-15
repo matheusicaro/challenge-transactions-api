@@ -1,17 +1,16 @@
-enum TransactionType {
-  PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
-  REFUND = 'REFUND'
-}
-
 /**
  * Transaction as a domain entity
  */
 type Transaction = {
-  customerName: string;
+  customer: string;
   date: Date;
-  type: TransactionType;
+  originalDate: string;
+  type: string; // it could be enum of TransactionType=[ REFUND, PAYMENT, etc.]
+  item: string;
   orderId: string;
+  price: number;
   amount: number;
+  accuracy?: number;
 };
 
-export { Transaction, TransactionType };
+export { Transaction };
