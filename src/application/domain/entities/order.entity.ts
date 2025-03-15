@@ -5,10 +5,10 @@ import { Transaction } from './transaction.entity';
  */
 type Order = {
   id: string;
-  type: string;
-  customerName: string;
+  customer: string;
   date: Date;
-  product: {
+  originalDate: string;
+  item: {
     // Product could be a new entity, but will leave as a sub entity of Order for now
     name: string;
     price: number;
