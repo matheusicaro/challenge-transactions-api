@@ -20,3 +20,7 @@ export const parseToDate = (dateAsString: string): Date | undefined => {
 export const getDataFormatted = (date: Date): string => {
   return date.toJSON().split('T')[0];
 };
+
+export const isSameDate = (date_1: Date, date_2: Date) => {
+  return getDataFormatted(date_1) === getDataFormatted(date_2);
+};

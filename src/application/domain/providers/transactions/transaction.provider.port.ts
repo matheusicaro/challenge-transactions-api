@@ -1,10 +1,6 @@
-import { TransactionsDTO } from '../../entities/dtos/transactions-record-Input.dto';
+import { TransactionDTO } from '../../entities/dtos/transactions-record-Input.dto';
 import { Transaction } from '../../entities/transaction.entity';
 
-export type CustomerTransactions = Array<{ customerName: string; transactions: Transaction[] }>;
-
 export interface TransactionsProviderPort {
-  getTransactionsFromDTOs(dto: TransactionsDTO[]): Transaction[];
-
-  getCustomerTransactions(transactions: Transaction[]): CustomerTransactions;
+  getTransactionsFromDTOs(dto: TransactionDTO[]): Transaction[];
 }
