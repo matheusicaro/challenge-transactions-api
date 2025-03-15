@@ -4,58 +4,79 @@ import { OrdersProviderPort } from './order.provider.port';
 import { TransactionsProviderPort } from '../transactions/transaction.provider.port';
 
 import { ProviderTokens } from '../../../../configuration/dependency-registries/tokens';
-import { getDataFormatted, parseToDate } from '../../../lib/dates';
+import { parseToDate } from '../../../lib/dates';
 
-import { CostumerOrderMatch } from '../../entities/costumer-order-match.entity';
+import { MatchTransactionDTO } from '../../entities/dtos/match-transactions.dto';
 import { OrderDTO, TransactionsRecordInput } from '../../entities/dtos/transactions-record-Input.dto';
 import { Order } from '../../entities/order.entity';
 import { Transaction } from '../../entities/transaction.entity';
+import { OperationMatcherProviderPort } from '../operations-matcher/operation-matcher.port';
+import { buildMatchTransaction } from './order.helpers';
 
 class OrdersProviderAdapter implements OrdersProviderPort {
   constructor(
     @inject(ProviderTokens.TransactionsProvider)
     private transactionsProvider: TransactionsProviderPort,
     @inject(ProviderTokens.TransactionsProvider)
-    private transactionsProvider: TransactionsProviderPort
+    private operationMatcherProvider: OperationMatcherProviderPort
   ) {}
 
-  public getOrdersMatchedWithTransactions(input: TransactionsRecordInput): CostumerOrderMatch[] {
+  public getOrdersMatchedWithTransactions(input: TransactionsRecordInput): MatchTransactionDTO {
     const orders = this.getOrdersFromDTOs(input.orders);
     const transactions = this.transactionsProvider.getTransactionsFromDTOs(input.transactions);
-    const customerTransactions = this.transactionsProvider.getCustomerTransactions(transactions);
 
-    const costumerOrderMatchList: CostumerOrderMatch[] = [];
+    const linkedTransactionsOrderId: string[] = [];
+    const unLinkedTransactionsOrderId: string[] = [];
+
+    const unlinkedOrders: Order[] = [];
 
     for (const order of orders) {
+      for (const transaction of transactions) {
+        const result = this.operationMatcherProvider.verifyMatch(order, transaction);
 
-      
-      const oderTransactions = customerTransactions.find((item) => item.customerName === orderDto.customerName);
+        if (result.match) {
+          order.transactions.push({ ...transaction, accuracy: result.accuracy });
+          linkedTransactionsOrderId.push(transaction.orderId);
+        } else {
+          unLinkedTransactionsOrderId.push(transaction.orderId);
+        }
+      }
 
-      const order = this.buildOrder(orderDto, oderTransactions?.transactions || []);
-
-      const costumerOrder = {
-        id: order.id,
-        type: order.type,
-        date: getDataFormatted(order.date),
-        product: order.product,
-        transactions: order.transactions.map(({ amount, date, orderId, type }) => ({
-          amount,
-          date: getDataFormatted(date),
-          orderId,
-          type
-        }))
-      };
-
-      const foundCostumerOrderMatch = costumerOrderMatchList.find((item) => item.customerName === order.customerName);
-
-      if (foundCostumerOrderMatch) {
-        foundCostumerOrderMatch.orders.push(costumerOrder);
-      } else {
-        costumerOrderMatchList.push({ customerName: order.customerName, orders: [costumerOrder] });
+      if (order.transactions.length === 0) {
+        unlinkedOrders.push(order);
       }
     }
 
-    return costumerOrderMatchList;
+    /**
+     *
+     * TODO: store the orders and unlinked transactions?
+     *  - database, or dataflow, .etc
+     *
+     */
+
+    const matchTransactionResponse = buildMatchTransaction({
+      orders,
+      transactions: input.transactions,
+      unlinkedTransactions: this.getUnlinkedTransactions({
+        unLinkedTransactionsOrderId,
+        linkedTransactionsOrderId,
+        transactions
+      }),
+      unlinkedOrders
+    });
+
+    return matchTransactionResponse;
+  }
+
+  private getUnlinkedTransactions(input: {
+    unLinkedTransactionsOrderId: string[];
+    linkedTransactionsOrderId: string[];
+    transactions: Transaction[];
+  }): Transaction[] {
+    const uniqueLinkedTransactions = input.unLinkedTransactionsOrderId.filter(
+      (id) => !input.linkedTransactionsOrderId.includes(id)
+    );
+    return input.transactions.filter(({ orderId }) => uniqueLinkedTransactions.includes(orderId));
   }
 
   private getOrdersFromDTOs(oderDtoList: OrderDTO[]): Order[] {
@@ -73,12 +94,12 @@ class OrdersProviderAdapter implements OrdersProviderPort {
 
     return {
       id: dto.orderId,
-      type: dto.type,
       date,
-      customerName: dto.customerName,
+      originalDate: dto.date,
+      customer: dto.customer,
       transactions: transactions,
-      product: {
-        name: dto.product,
+      item: {
+        name: dto.item,
         price: dto.price
       }
     };
